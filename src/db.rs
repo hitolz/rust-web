@@ -24,8 +24,11 @@ pub async fn init_db(database_url: String) {
     let mut pools = MYSQL_POOL.lock().unwrap();
     (*pools).push(pool);
 
-    let rb = RBatis::new();
-    rb.init(MysqlDriver {}, &database_url).unwrap();
+    let rbatis = RBatis::new();
+    rbatis.init(MysqlDriver {}, &database_url).unwrap();
+    let mut rb = RB.lock().unwrap();
+    *rb = rbatis;
+
 }
 
 pub async fn get_mysql_pool() -> Pool<MySql> {
