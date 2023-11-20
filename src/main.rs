@@ -1,31 +1,12 @@
+use actix_web::{get, App, HttpResponse, HttpServer};
+use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 use std::{thread, time};
-use actix_web::{App, get, HttpResponse, HttpServer};
-use serde::{ser, Serialize};
 
+use crate::api::success;
+
+mod api;
+mod db;
 mod middleware;
-
-#[derive(Serialize)]
-pub struct WebApiResponse<T: ser::Serialize> {
-    pub code: u32,
-    pub data: Option<T>,
-    pub error: Option<String>,
-}
-
-pub fn success<T: ser::Serialize>(r: Option<T>) -> HttpResponse {
-    HttpResponse::Ok().json(WebApiResponse {
-        code: 0,
-        data: r,
-        error: None,
-    })
-}
-
-pub fn error(err: Option<String>) -> HttpResponse {
-    HttpResponse::Ok().json(WebApiResponse::<String> {
-        code: 1,
-        data: None,
-        error: err,
-    })
-}
 
 #[get("/hello1")]
 async fn hello1() -> HttpResponse {
@@ -41,14 +22,18 @@ async fn hello2() -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let database_url = "mysql://root:12345678@localhost:3306/rust_web".to_string();
+    db::init_db(database_url).await;
+
     HttpServer::new(|| {
         App::new()
             .wrap(middleware::timed::Timed)
             .wrap(middleware::auth::Auth)
             .service(hello1)
             .service(hello2)
+            .service(api::user::routes())
     })
-        .bind(("127.0.0.1", 8099))?
-        .run()
-        .await
+    .bind(("127.0.0.1", 8099))?
+    .run()
+    .await
 }

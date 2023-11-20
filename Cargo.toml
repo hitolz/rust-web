@@ -8,6 +8,22 @@ edition = "2021"
 [dependencies]
 serde = { version = "1.0", features = ["derive"] }
 serde_json = { version = "1.0.2", optional = true }
-actix-web="4"
-futures = {version = "*"}
+actix-web = "4"
+futures = { version = "*" }
 futures-util = "0.3"
+
+
+sqlx = { version = "0.7.2", features = [
+    "runtime-async-std-native-tls",
+    "mysql",
+    "chrono",
+] }
+
+
+# rbatis
+rbs = { version = "4.3" }
+rbatis = { version = "4.3" }
+rbdc-mysql = { version = "4.3" }
+
+
+lazy_static = { version = "1.4"}
