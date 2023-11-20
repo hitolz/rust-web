@@ -1,0 +1,12 @@
+[app]
+host="127.0.0.1"
+port=8099
+
+[database]
+host="localhost"
+port=3306
+user = "root"
+password = "12345678"
+name = "rust_web"
+
+

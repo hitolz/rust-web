@@ -1,10 +1,10 @@
 use actix_web::{get, App, HttpResponse, HttpServer};
-use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 use std::{thread, time};
 
 use crate::api::success;
 
 mod api;
+mod config;
 mod db;
 mod middleware;
 
@@ -22,8 +22,11 @@ async fn hello2() -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    let database_url = "mysql://root:12345678@localhost:3306/rust_web".to_string();
+    let database_url = config::SERVER_CONFIG.database_url();
+    let (host,port) = config::SERVER_CONFIG.get_app_host_port();
     db::init_db(database_url).await;
+
+    println!("app started http://{}:{}",host,port);
 
     HttpServer::new(|| {
         App::new()
@@ -33,7 +36,7 @@ async fn main() -> std::io::Result<()> {
             .service(hello2)
             .service(api::user::routes())
     })
-    .bind(("127.0.0.1", 8099))?
+    .bind((host,port))?
     .run()
     .await
 }
