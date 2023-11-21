@@ -21,6 +21,7 @@ pub fn success<T: ser::Serialize>(r: Option<T>) -> HttpResponse {
     })
 }
 
+#[allow(dead_code)]
 pub fn error(err: Option<String>) -> HttpResponse {
     HttpResponse::Ok().json(WebApiResponse::<String> {
         code: 1,

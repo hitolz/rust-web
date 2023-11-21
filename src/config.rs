@@ -1,7 +1,10 @@
 use std::fs;
 
 use lazy_static::*;
+use log::info;
 use serde::Deserialize;
+use crate::log_config;
+use dotenv::dotenv;
 
 /// 主机,端口
 #[derive(Deserialize, Default, Debug, Clone)]
@@ -45,14 +48,19 @@ lazy_static! {
 }
 
 pub fn load_config() -> ServerConfig {
+
+    dotenv().ok();
+    log_config::init_log();
+
+
     let current_path = env!("CARGO_MANIFEST_DIR");
-    println!("current path: {}", current_path);
+    info!("current path: {}", current_path);
     // 读取配置文件
     let toml_file = format!("{}/configs/config.toml", current_path);
 
     let content = fs::read_to_string(toml_file).unwrap();
     let config: ServerConfig = toml::from_str(&content).unwrap();
-    println!("config :{:?}", config);
+    info!("config :{:?}", config);
     config
 }
 
