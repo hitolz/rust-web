@@ -7,6 +7,7 @@ use actix_web::{
     Error,
 };
 use futures_util::future::LocalBoxFuture;
+use log::error;
 
 // There are two steps in middleware processing.
 // 1. Middleware initialization, middleware factory gets called with
@@ -51,6 +52,7 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
+        let path = req.path();
         let value = HeaderValue::from_str("").unwrap();
         let token: &HeaderValue = req.headers().get("token").unwrap_or(&value);
         if token.len() > 0 || req.path().to_string() == "/login" {
@@ -60,6 +62,7 @@ where
                 res
             })
         } else {
+            error!("request path is not authorized please login,path = {}", req.path());
             Box::pin(async move { Err(ErrorUnauthorized("PLEASE LOGIN")) })
         }
     }

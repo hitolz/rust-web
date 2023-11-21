@@ -30,3 +30,10 @@ lazy_static = { version = "1.4"}
 
 toml = "0.8.8"
 # config = "0.13.1"
+
+
+log = "0.4"
+env_logger = "0.10"
+
+dotenv = "0.15.0"
+chrono = "0.4"
