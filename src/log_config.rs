@@ -1,9 +1,17 @@
 use chrono::{FixedOffset, Utc};
-use env_logger::Builder;
+use env_logger::{Builder, Target};
+use std::fs::OpenOptions;
 use std::io::Write;
 
 pub fn init_log() {
     // env_logger::init();
+    let file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open("app.log")
+        .expect("Failed to open log file");
+    let target = Box::new(file);
 
     let mut builder = Builder::from_default_env();
     builder
@@ -18,5 +26,6 @@ pub fn init_log() {
                 record.args()
             )
         })
+        .target(Target::Pipe(target))
         .init();
 }
