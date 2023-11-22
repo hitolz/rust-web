@@ -33,7 +33,12 @@ toml = "0.8.8"
 
 
 log = "0.4"
-env_logger = "0.10"
+#env_logger = "0.10"
+tracing = "0.1"
+tracing-subscriber = {version = "0.3",features = ["env-filter", "time", "local-time", ] }
+time = { version = "0.3.7", features = ["macros"] }
+tracing-appender = "0.2.3"
+
 
 dotenv = "0.15.0"
 chrono = "0.4"
