@@ -16,7 +16,7 @@ pub fn init_log() {
 
     let log_path = log_info.path.as_str();
 
-    let _x = Dispatch::new()
+    Dispatch::new()
         .format(move |out, message, record| {
             out.finish(format_args!(
                 "{} {} [{}:{}] {}",
@@ -30,5 +30,7 @@ pub fn init_log() {
         .level(log_level)
         .chain(std::io::stdout())
         .chain(fern::log_file(log_path).unwrap())
-        .apply();
+        .level_for("sqlx", log::LevelFilter::Error)
+        .apply()
+        .expect("log init error");
 }
