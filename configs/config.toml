@@ -10,3 +10,6 @@ password = "12345678"
 name = "rust_web"
 
 
+[log]
+level = "info"
+path = "app.log"

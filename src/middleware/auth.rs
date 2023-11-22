@@ -52,7 +52,6 @@ where
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let path = req.path();
         let value = HeaderValue::from_str("").unwrap();
         let token: &HeaderValue = req.headers().get("token").unwrap_or(&value);
         if token.len() > 0 || req.path().to_string() == "/login" {

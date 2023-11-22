@@ -28,7 +28,7 @@ crud!(User {});
 #[post("/add")]
 pub async fn add_user(user: web::Json<User>) -> HttpResponse {
     let user = user.to_owned();
-    let id = save_user(user.clone()).await.unwrap();
+    // let id = save_user(user.clone()).await.unwrap();
     let id = save_user_rb(user).await;
     success(Some(id))
 }
@@ -40,6 +40,7 @@ async fn save_user_rb(user: User) -> i64 {
     i64::from(x.last_insert_id)
 }
 
+#[allow(dead_code)]
 async fn save_user(user: User) -> Result<u64, sqlx::Error> {
     let pool = get_mysql_pool().await;
     let sql = "insert into user(user_name, password) values (?,?)";
@@ -56,15 +57,15 @@ async fn save_user(user: User) -> Result<u64, sqlx::Error> {
 pub async fn update_user(id: web::Path<i64>, user: web::Json<User>) -> HttpResponse {
     let user = user.to_owned();
 
-    // let sql = "update user set user_name =?, password =? where id = ?";
-    // sqlx::query(sql)
-    //     .bind(user.user_name)
-    //     .bind(user.password)
-    //     .bind(id.into_inner())
-    //     .execute(&get_mysql_pool().await)
-    //     .await
-    //     .unwrap();
-    let _ = User::update_by_column(&get_rb().await, &user, "id").await;
+    let sql = "update user set user_name =?, password =? where id = ?";
+    sqlx::query(sql)
+        .bind(user.user_name)
+        .bind(user.password)
+        .bind(id.into_inner())
+        .execute(&get_mysql_pool().await)
+        .await
+        .unwrap();
+    // let _ = User::update_by_column(&get_rb().await, &user, "id").await;
     success(Some(1))
 }
 

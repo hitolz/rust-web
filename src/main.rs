@@ -1,6 +1,7 @@
 use actix_web::{get, App, HttpResponse, HttpServer};
 use log::info;
 use std::{thread, time};
+use dotenv::dotenv;
 
 use crate::api::success;
 
@@ -24,6 +25,10 @@ async fn hello2() -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+    dotenv().ok();
+    log_config::init_log();
+
     let database_url = config::SERVER_CONFIG.database_url();
     let (host, port) = config::SERVER_CONFIG.get_app_host_port();
     db::init_db(database_url).await;

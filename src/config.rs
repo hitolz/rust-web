@@ -3,8 +3,6 @@ use std::fs;
 use lazy_static::*;
 use log::info;
 use serde::Deserialize;
-use crate::log_config;
-use dotenv::dotenv;
 
 /// 主机,端口
 #[derive(Deserialize, Default, Debug, Clone)]
@@ -24,9 +22,16 @@ pub struct Database {
 }
 
 #[derive(Deserialize, Default, Debug, Clone)]
+pub struct Log {
+    pub level: String,
+    pub path: String,
+}
+
+#[derive(Deserialize, Default, Debug, Clone)]
 pub struct ServerConfig {
     pub app: App,
     pub database: Database,
+    pub log: Log,
 }
 
 impl ServerConfig {
@@ -41,6 +46,10 @@ impl ServerConfig {
     pub fn get_app_host_port(&self) -> (&str, u16) {
         (&self.app.host, self.app.port)
     }
+
+    pub fn get_log_info(&self) -> &Log {
+        &self.log
+    }
 }
 
 lazy_static! {
@@ -48,11 +57,6 @@ lazy_static! {
 }
 
 pub fn load_config() -> ServerConfig {
-
-    dotenv().ok();
-    log_config::init_log();
-
-
     let current_path = env!("CARGO_MANIFEST_DIR");
     info!("current path: {}", current_path);
     // 读取配置文件
