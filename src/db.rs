@@ -5,7 +5,7 @@ use sqlx::{mysql::MySqlPoolOptions, MySql, Pool};
 use std::{sync::Mutex, time::Duration};
 
 lazy_static! {
-    static ref MYSQL_POOL: Mutex<Vec<Pool<MySql>>> = Mutex::new(vec![]);
+    static ref MYSQL_POOL: Mutex<Option<Pool<MySql>>> = Mutex::new(None);
 }
 
 lazy_static! {
@@ -22,7 +22,7 @@ pub async fn init_db(database_url: String) {
         .unwrap();
 
     let mut pools = MYSQL_POOL.lock().unwrap();
-    (*pools).push(pool);
+    (*pools) = Some(pool);
 
     let rbatis = RBatis::new();
     rbatis.init(MysqlDriver {}, &database_url).unwrap();
@@ -33,7 +33,8 @@ pub async fn init_db(database_url: String) {
 
 pub async fn get_mysql_pool() -> Pool<MySql> {
     let pools = MYSQL_POOL.lock().unwrap();
-    unsafe { (*pools).get_unchecked(0).to_owned() }
+    let x = pools.as_ref().unwrap() ;
+    x.clone()
 }
 
 pub async fn get_rb() -> RBatis {
