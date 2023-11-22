@@ -38,14 +38,14 @@ log = "0.4"
 #env_logger = "0.10"
 
 # tracing
-#tracing = "0.1"
-#tracing-subscriber = {version = "0.3",features = ["env-filter", "time", "local-time", ] }
-#time = { version = "0.3.7", features = ["macros"] }
-#tracing-appender = "0.2.3"
+tracing = "0.1"
+tracing-subscriber = {version = "0.3",features = ["env-filter", "time", "local-time", ] }
+time = { version = "0.3.7", features = ["macros"] }
+tracing-appender = "0.2.3"
 
 
 # fern
-fern = "0.6.1"
+#fern = "0.6.1"
 
 dotenv = "0.15.0"
 chrono = "0.4"

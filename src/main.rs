@@ -13,8 +13,17 @@ mod middleware;
 
 #[get("/hello1")]
 async fn hello1() -> HttpResponse {
-    thread::sleep(time::Duration::from_secs(1));
+    info!("hello1 start");
+    thread::spawn(||{
+        handle();
+    });
+    info!("hello1 end");
     success(Option::from(format!("Hello1")))
+}
+
+fn handle() {
+    info!("do something for hello1");
+    thread::sleep(time::Duration::from_secs(3));
 }
 
 #[get("/hello2")]

@@ -1,36 +1,35 @@
-use chrono::Local;
-use fern::Dispatch;
+use time::macros::{format_description, offset};
+use tracing_subscriber::fmt::time::{FormatTime, OffsetTime};
+use tracing_subscriber::fmt::writer::MakeWriterExt;
+use tracing_subscriber::EnvFilter;
 
-use crate::config;
+// 自定义时间格式化
+struct LocalTimer;
+const fn east8() -> Option<chrono::FixedOffset> {
+    chrono::FixedOffset::east_opt(8 * 3600)
+}
+
+impl FormatTime for LocalTimer {
+    fn format_time(&self, w: &mut tracing_subscriber::fmt::format::Writer<'_>) -> std::fmt::Result {
+        let now = chrono::Utc::now().with_timezone(&east8().unwrap());
+        write!(w, "{}", now.format("%Y-%m-%d %H:%M:%SS"))
+    }
+}
 
 pub fn init_log() {
-    let log_info = config::SERVER_CONFIG.get_log_info();
+    let time_fmt =
+        format_description!("[year]-[month]-[day] [hour]:[minute]:[second].[subsecond digits:3]");
+    let timer = OffsetTime::new(offset!(+8), time_fmt);
 
-    let log_level = match log_info.level.as_str() {
-        "trace" => log::LevelFilter::Trace,
-        "debug" => log::LevelFilter::Debug,
-        "info" => log::LevelFilter::Info,
-        "warn" => log::LevelFilter::Warn,
-        _ => log::LevelFilter::Error,
-    };
+    let appender = tracing_appender::rolling::daily("log/", "app.log");
+    let stdout = std::io::stdout.with_max_level(tracing::Level::INFO);
 
-    let log_path = log_info.path.as_str();
-
-    Dispatch::new()
-        .format(move |out, message, record| {
-            out.finish(format_args!(
-                "{} {} [{}:{}] {}",
-                Local::now().format("%Y-%m-%d %H:%M:%S"),
-                record.level(),
-                record.module_path().unwrap_or("<unnamed>"),
-                record.line().unwrap_or(0),
-                message
-            ))
-        })
-        .level(log_level)
-        .chain(std::io::stdout())
-        .chain(fern::log_file(log_path).unwrap())
-        .level_for("sqlx", log::LevelFilter::Error)
-        .apply()
-        .expect("log init error");
+    tracing_subscriber::fmt()
+        .with_env_filter(EnvFilter::from_default_env())
+        .with_timer(timer)
+        // .with_timer(LocalTimer)
+        .with_writer(stdout.and(appender))
+        .with_line_number(true)
+        .with_thread_ids(true)
+        .init();
 }
