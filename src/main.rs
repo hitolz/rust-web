@@ -1,7 +1,13 @@
+use ::time::Instant;
 use actix_web::{get, App, HttpResponse, HttpServer};
-use log::info;
-use std::{thread, time};
 use dotenv::dotenv;
+use log::info;
+use rayon::prelude::*;
+use std::{
+    sync::Mutex,
+    thread::{self, ThreadId},
+    time::{self, Duration},
+};
 
 use crate::api::success;
 
@@ -14,7 +20,8 @@ mod middleware;
 #[get("/hello1")]
 async fn hello1() -> HttpResponse {
     info!("hello1 start");
-    thread::spawn(||{
+
+    thread::spawn(|| {
         handle();
     });
     info!("hello1 end");
@@ -22,8 +29,24 @@ async fn hello1() -> HttpResponse {
 }
 
 fn handle() {
-    info!("do something for hello1");
-    thread::sleep(time::Duration::from_secs(3));
+    info!("sum start");
+    let pool = rayon::ThreadPoolBuilder::new()
+        .num_threads(2)
+        .build()
+        .unwrap();
+    let start = Instant::now();
+    let vec: Vec<i32> = (0..=1000).collect();
+    pool.install(|| {
+        let sum: i32 = vec
+            .par_iter()
+            .map(|x| {
+                thread::sleep(Duration::from_millis(5));
+                x
+            })
+            .sum();
+        let elapsed_time = start.elapsed();
+        info!("0..=1000 sum = {},elapsed time {}", sum, elapsed_time);
+    });
 }
 
 #[get("/hello2")]
@@ -34,7 +57,6 @@ async fn hello2() -> HttpResponse {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-
     dotenv().ok();
     log_config::init_log();
 
