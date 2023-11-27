@@ -1,13 +1,13 @@
+use std::{
+    thread::{self},
+    time::{self, Duration},
+};
+
 use ::time::Instant;
 use actix_web::{get, App, HttpResponse, HttpServer};
 use dotenv::dotenv;
 use log::info;
 use rayon::prelude::*;
-use std::{
-    sync::Mutex,
-    thread::{self, ThreadId},
-    time::{self, Duration},
-};
 
 use crate::api::success;
 
@@ -21,32 +21,52 @@ mod middleware;
 async fn hello1() -> HttpResponse {
     info!("hello1 start");
 
-    thread::spawn(|| {
-        handle();
+    let x = tokio::spawn(async move {
+        handle(1)
     });
+
+    let x = tokio::spawn(async move {
+        handle(11)
+    });
+
+    let x = tokio::spawn({
+        handle_async(2)
+    });
+
+    let x = tokio::spawn({
+        handle_async(22)
+    });
+
+
+    let x = tokio::task::spawn_blocking(||{
+        handle(3);
+    });
+
+    let x = tokio::task::spawn_blocking(||{
+        handle(33);
+    });
+
+    let x = tokio::task::spawn_blocking(||{
+        handle_async(4)
+    });
+
+    let x = tokio::task::spawn_blocking(||{
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(handle_async(44))
+    });
+
     info!("hello1 end");
     success(Option::from(format!("Hello1")))
 }
 
-fn handle() {
-    info!("sum start");
-    let pool = rayon::ThreadPoolBuilder::new()
-        .num_threads(2)
-        .build()
-        .unwrap();
-    let start = Instant::now();
-    let vec: Vec<i32> = (0..=1000).collect();
-    pool.install(|| {
-        let sum: i32 = vec
-            .par_iter()
-            .map(|x| {
-                thread::sleep(Duration::from_millis(5));
-                x
-            })
-            .sum();
-        let elapsed_time = start.elapsed();
-        info!("0..=1000 sum = {},elapsed time {}", sum, elapsed_time);
-    });
+async fn handle_async(x: i32) {
+    info!("handle start x = {} ...", x);
+    thread::sleep(Duration::from_secs(3));
+}
+
+fn handle(x: i32) {
+    info!("handle start x = {} ...", x);
+    thread::sleep(Duration::from_secs(3));
 }
 
 #[get("/hello2")]
@@ -55,7 +75,7 @@ async fn hello2() -> HttpResponse {
     success(Option::from(format!("Hello2")))
 }
 
-#[actix_web::main]
+#[tokio::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
     log_config::init_log();
