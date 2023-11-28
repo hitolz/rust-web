@@ -21,36 +21,25 @@ mod middleware;
 async fn hello1() -> HttpResponse {
     info!("hello1 start");
 
-    let x = tokio::spawn(async move {
-        handle(1)
-    });
+    let x = tokio::spawn(async move { handle(1) });
 
-    let x = tokio::spawn(async move {
-        handle(11)
-    });
+    let x = tokio::spawn(async move { handle(11) });
 
-    let x = tokio::spawn({
-        handle_async(2)
-    });
+    let x = tokio::spawn({ handle_async(2) });
 
-    let x = tokio::spawn({
-        handle_async(22)
-    });
+    let x = tokio::spawn({ handle_async(22) });
 
-
-    let x = tokio::task::spawn_blocking(||{
+    let x = tokio::task::spawn_blocking(|| {
         handle(3);
     });
 
-    let x = tokio::task::spawn_blocking(||{
+    let x = tokio::task::spawn_blocking(|| {
         handle(33);
     });
 
-    let x = tokio::task::spawn_blocking(||{
-        handle_async(4)
-    });
+    let x = tokio::task::spawn_blocking(|| handle_async(4));
 
-    let x = tokio::task::spawn_blocking(||{
+    let x = tokio::task::spawn_blocking(|| {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(handle_async(44))
     });
@@ -75,6 +64,12 @@ async fn hello2() -> HttpResponse {
     success(Option::from(format!("Hello2")))
 }
 
+#[get("/send")]
+async fn send() -> HttpResponse {
+    middleware::kafka::send("hello").await;
+    success(Some(true))
+}
+
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -83,6 +78,8 @@ async fn main() -> std::io::Result<()> {
     let database_url = config::SERVER_CONFIG.database_url();
     let (host, port) = config::SERVER_CONFIG.get_app_host_port();
     db::init_db(database_url).await;
+
+    tokio::spawn(middleware::kafka::init_consumer());
 
     info!("app started http://{}:{}", host, port);
 
@@ -93,6 +90,7 @@ async fn main() -> std::io::Result<()> {
             .service(hello1)
             .service(hello2)
             .service(api::user::routes())
+            .service(send)
     })
     .bind((host, port))?
     .run()

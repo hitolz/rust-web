@@ -26,12 +26,19 @@ pub struct Log {
     pub level: String,
     pub path: String,
 }
+#[derive(Deserialize, Default, Debug, Clone)]
+pub struct KafkaConfig {
+    pub brokers: String,
+    pub group_id: String,
+}
+
 
 #[derive(Deserialize, Default, Debug, Clone)]
 pub struct ServerConfig {
     pub app: App,
     pub database: Database,
     pub log: Log,
+    pub kafka_config: KafkaConfig,
 }
 
 impl ServerConfig {
