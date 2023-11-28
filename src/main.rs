@@ -3,13 +3,13 @@ use std::{
     time::{self, Duration},
 };
 
-use ::time::Instant;
 use actix_web::{get, App, HttpResponse, HttpServer};
 use dotenv::dotenv;
 use log::info;
-use rayon::prelude::*;
+use simple_kafka::kafka_producer;
 
-use crate::api::success;
+use crate::middleware::kafka::message_handler;
+use crate::{api::success, middleware::kafka::TOPIC};
 
 mod api;
 mod config;
@@ -21,25 +21,25 @@ mod middleware;
 async fn hello1() -> HttpResponse {
     info!("hello1 start");
 
-    let x = tokio::spawn(async move { handle(1) });
+    let _x = tokio::spawn(async move { handle(1) });
 
-    let x = tokio::spawn(async move { handle(11) });
+    let _x = tokio::spawn(async move { handle(11) });
 
-    let x = tokio::spawn({ handle_async(2) });
+    let _x = tokio::spawn(handle_async(2));
 
-    let x = tokio::spawn({ handle_async(22) });
+    let _xx = tokio::spawn(handle_async(22));
 
-    let x = tokio::task::spawn_blocking(|| {
+    let _x = tokio::task::spawn_blocking(|| {
         handle(3);
     });
 
-    let x = tokio::task::spawn_blocking(|| {
+    let _x = tokio::task::spawn_blocking(|| {
         handle(33);
     });
 
-    let x = tokio::task::spawn_blocking(|| handle_async(4));
+    let _x = tokio::task::spawn_blocking(|| handle_async(4));
 
-    let x = tokio::task::spawn_blocking(|| {
+    let _x = tokio::task::spawn_blocking(|| {
         let rt = tokio::runtime::Runtime::new().unwrap();
         rt.block_on(handle_async(44))
     });
@@ -66,7 +66,8 @@ async fn hello2() -> HttpResponse {
 
 #[get("/send")]
 async fn send() -> HttpResponse {
-    middleware::kafka::send("hello").await;
+    let _ = kafka_producer::send_timeout(TOPIC, "key", "hello".as_bytes(), Duration::from_secs(3))
+        .await;
     success(Some(true))
 }
 
@@ -79,8 +80,12 @@ async fn main() -> std::io::Result<()> {
     let (host, port) = config::SERVER_CONFIG.get_app_host_port();
     db::init_db(database_url).await;
 
-    tokio::spawn(middleware::kafka::init_consumer());
-
+    let kafka_config = &config::SERVER_CONFIG.kafka_config;
+    let _init_task = tokio::spawn(async {
+        let simple_kafka_config: simple_kafka::KafkaConfig = kafka_config.to_owned().into();
+        simple_kafka::kafka_init::init_producers(&simple_kafka_config).await;
+        simple_kafka::kafka_init::init_consumers(&simple_kafka_config, TOPIC, message_handler).await;
+    });
     info!("app started http://{}:{}", host, port);
 
     HttpServer::new(|| {

@@ -32,6 +32,14 @@ pub struct KafkaConfig {
     pub group_id: String,
 }
 
+impl Into<simple_kafka::KafkaConfig> for KafkaConfig {
+    fn into(self) -> simple_kafka::KafkaConfig {
+        simple_kafka::KafkaConfig{
+            brokers: self.brokers,
+            group_id: self.group_id,
+        }
+    }
+}
 
 #[derive(Deserialize, Default, Debug, Clone)]
 pub struct ServerConfig {
@@ -41,6 +49,7 @@ pub struct ServerConfig {
     pub kafka_config: KafkaConfig,
 }
 
+#[allow(dead_code)]
 impl ServerConfig {
     pub fn database_url(&self) -> String {
         let db = &self.database;
