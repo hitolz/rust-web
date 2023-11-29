@@ -51,3 +51,7 @@ tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 
 #rdkafka = {version = "0.36.0", features = ["tokio"]}
 simple-kafka = "0.0.8"
+
+
+# redis
+redis = "0.23.3"

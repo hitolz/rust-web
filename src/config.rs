@@ -41,12 +41,18 @@ impl Into<simple_kafka::KafkaConfig> for KafkaConfig {
     }
 }
 
+#[derive(Deserialize, Default, Debug,Clone)]
+pub struct RedisConfig {
+    pub cluster: String,
+}
+
 #[derive(Deserialize, Default, Debug, Clone)]
 pub struct ServerConfig {
     pub app: App,
     pub database: Database,
     pub log: Log,
     pub kafka_config: KafkaConfig,
+    pub redis_config: RedisConfig,
 }
 
 #[allow(dead_code)]

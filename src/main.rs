@@ -71,6 +71,18 @@ async fn send() -> HttpResponse {
     success(Some(true))
 }
 
+#[get("/set_redis")]
+async fn set_redis() -> HttpResponse{
+    let result = middleware::redis_client::set_ex("hello".to_string(), "hello".to_string(), 100);
+    success(Some(result))
+}
+
+#[get("/get_redis")]
+async fn get_redis() -> HttpResponse{
+    let result = middleware::redis_client::get("hello".to_string());
+    success(Some(result))
+}
+
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     dotenv().ok();
@@ -96,6 +108,8 @@ async fn main() -> std::io::Result<()> {
             .service(hello2)
             .service(api::user::routes())
             .service(send)
+            .service(set_redis)
+            .service(get_redis)
     })
     .bind((host, port))?
     .run()
