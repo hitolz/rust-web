@@ -3,7 +3,7 @@ host="127.0.0.1"
 port=8099
 
 [database]
-host="localhost"
+host="192.168.0.116"
 port=3306
 user = "root"
 password = "12345678"
@@ -16,8 +16,8 @@ path = "app.log"
 
 
 [kafka_config]
-brokers = "localhost:9092"
+brokers = "192.168.0.116:9092"
 group_id = "test_group"
 
 [redis_config]
-cluster = "redis://localhost:6379/"
+cluster = "redis://192.168.0.116:6379/"
