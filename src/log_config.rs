@@ -25,7 +25,6 @@ pub fn init_log() {
     let stdout = std::io::stdout.with_max_level(tracing::Level::INFO);
 
     tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
         .with_timer(timer)
         // .with_timer(LocalTimer)
         .with_writer(stdout.and(appender))
