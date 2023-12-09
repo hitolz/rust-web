@@ -1,7 +1,11 @@
 # 使用官方 Rust 镜像作为基础镜像，并添加 cargo-chef
-FROM rust:1.71.0 as planner
-WORKDIR /app
+FROM rust:1.71.0 as chef
+#ADD .cargo $CARGO_HOME/
 RUN cargo install cargo-chef
+
+FROM chef as planner
+
+WORKDIR /app
 # 复制整个项目到容器中
 COPY . .
 RUN rm Cargo.lock
@@ -10,7 +14,7 @@ RUN rm Cargo.lock
 RUN cargo chef prepare --recipe-path recipe.json
 
 # 构建阶段
-FROM rust:1.71.0 as builder
+FROM chef as builder
 WORKDIR /app
 
 # 复制项目和 recipe.json
@@ -19,7 +23,6 @@ COPY . .
 RUN rm Cargo.lock
 
 # 使用 cargo-chef 加速构建过程
-RUN cargo install cargo-chef
 RUN cargo chef cook --release --recipe-path recipe.json
 
 # 构建应用程序
