@@ -1,7 +1,5 @@
 # Rust web 开发-1.web 框架
 
-[toc]
-
 本系列文章从以下几个方面学习如何使用 Rust 进行 web 开发。
 
 1. web 框架
