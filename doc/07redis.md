@@ -2,7 +2,7 @@
 
 [toc]
 
-本系列文章从以下 9 个方面学习如何使用 Rust 进行 web 开发。
+本系列文章从以下几个方面学习如何使用 Rust 进行 web 开发。
 
 1. web 框架
 2. 数据库/orm
@@ -12,7 +12,7 @@
 6. kafka
 7. redis
 8. 打包成 docker 镜像
-9. gracefully shutdown
+   ……
 
 ---
 本篇介绍一下 Rust 如何使用 redis。
@@ -40,21 +40,21 @@ let connection = client.get_connection().unwrap();
 
 ```rust
 pub fn set_ex(key: String, value: String, seconds: i32) -> bool {
-    get_redis_conn()
-        .set_ex::<String, String, bool>(key, value, seconds as usize)
-        .unwrap_or_else(|err| {
-            error!("Failed to set_ex value in Redis: {:?}", err);
-            false
-        })
+   get_redis_conn()
+           .set_ex::<String, String, bool>(key, value, seconds as usize)
+           .unwrap_or_else(|err| {
+              error!("Failed to set_ex value in Redis: {:?}", err);
+              false
+           })
 }
 
 pub fn get(key: String) -> String {
-    get_redis_conn()
-        .get::<String, String>(key)
-        .unwrap_or_else(|err| {
-            error!("Failed to get value from Redis: {:?}", err);
-            "".to_string()
-        })
+   get_redis_conn()
+           .get::<String, String>(key)
+           .unwrap_or_else(|err| {
+              error!("Failed to get value from Redis: {:?}", err);
+              "".to_string()
+           })
 }
 ```
 写了两个命令的实现，一个是 set_ex，一个是 get，api 中调用。
@@ -63,14 +63,14 @@ pub fn get(key: String) -> String {
 
 #[get("/set_redis")]
 async fn set_redis() -> HttpResponse{
-    let result = middleware::redis_client::set_ex("hello".to_string(), "hello".to_string(), 100);
-    success(Some(result))
+   let result = middleware::redis_client::set_ex("hello".to_string(), "hello".to_string(), 100);
+   success(Some(result))
 }
 
 #[get("/get_redis")]
 async fn get_redis() -> HttpResponse{
-    let result = middleware::redis_client::get("hello".to_string());
-    success(Some(result))
+   let result = middleware::redis_client::get("hello".to_string());
+   success(Some(result))
 }
 ```
 
