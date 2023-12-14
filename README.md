@@ -10,3 +10,6 @@
 7. [redis](https://mp.weixin.qq.com/s/SdIOjCD9fcS_XwBgVNYg-Q)
 8. [打包成 docker 镜像](https://mp.weixin.qq.com/s/L9Z3SLw6-35Mf45YG2iGcg)
 ……
+
+
+微信公众号专栏[ Rust web 开发](https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzA4OTczMTA5Nw==&action=getalbum&album_id=3200684718984380416&scene=173&subscene=&sessionid=svr_920c2fd4d41&enterid=1702542368&from_msgid=2452719710&from_itemidx=1&count=3&nolastread=1#wechat_redirect)
